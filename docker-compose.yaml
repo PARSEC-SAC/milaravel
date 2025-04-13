@@ -1,0 +1,67 @@
+services:
+  app:
+    container_name: filament_app
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - ./src:/var/www/html
+      - ./apache/000-default.conf:/etc/apache2/sites-available/000-default.conf
+    ports:
+      - "8080:80"
+    depends_on:
+      - db
+    networks:
+      - mynetwork
+    environment:
+      - PHP_EXTENSIONS=intl,bz2,zip,sodium
+
+  db:
+    image: mariadb:latest
+    container_name: filament_db
+    restart: always
+    environment:
+      MYSQL_DATABASE: laravel
+      MYSQL_USER: laravel
+      MYSQL_PASSWORD: secret
+      MYSQL_ROOT_PASSWORD: root
+    volumes:
+      - db_data:/var/lib/mysql
+    networks:
+      - mynetwork
+
+  php:
+    image: php:8.0-apache
+    container_name: php_container
+    volumes:
+      - ./src:/var/www/html
+      - ./apache/000-default.conf:/etc/apache2/sites-available/000-default.conf
+    ports:
+      - "8082:80"
+    depends_on:
+      - db
+    networks:
+      - mynetwork
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: phpmyadmin
+    restart: always
+    environment:
+      PMA_HOST: db
+      PMA_PORT: 3306
+      PMA_USER: laravel
+      PMA_PASSWORD: secret
+    ports:
+      - "8083:80"
+    depends_on:
+      - db
+    networks:
+      - mynetwork
+
+volumes:
+  db_data:
+
+networks:
+  mynetwork:
+    driver: bridge

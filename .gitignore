@@ -1,0 +1,14 @@
+
+#Ignora archivos de entorno
+
+.env
+
+/vendor
+
+dbdata/
+
+# Ignora volumenes y bases de datos
+*.sqlite
+*.log
+*.cache
+
